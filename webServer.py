@@ -4,74 +4,70 @@ from socket import *
 import sys
 
 
-
 def webServer(port=13331):
   serverSocket = socket(AF_INET, SOCK_STREAM)
   
   #Prepare a server socket
   serverSocket.bind(("", port))
-  
   #Fill in start
-
+  serverSocket.listen(1)
   #Fill in end
 
   while True:
     #Establish the connection
     
     print('Ready to serve...')
-    connectionSocket, addr = #Fill in start -are you accepting connections?     #Fill in end
+
+    #Fill in start -are you accepting connections?
+    connectionSocket, addr = 
+    #Fill in end
     
     try:
-      message = #Fill in start -a client is sending you a message   #Fill in end 
+      #Fill in start
+      message = connectionSocket.recv(1024).decode() #gets https request
+      #Fill in end 
+      
+      #get filename from GET request
       filename = message.split()[1]
       
-      #opens the client requested file. 
-      #Plenty of guidance online on how to open and read a file in python. How should you read it though if you plan on sending it through a socket?
-      f = open(filename[1:], #fill in start #fill in end)
+      #Fill in start
+      f = open(filename[1:], "r")
       #fill in end
       
 
-      #This variable can store the headers you want to send for any valid or invalid request.   What header should be sent for a response that is ok?    
-      #Fill in start 
-              
-      #Content-Type is an example on how to send a header as bytes. There are more!
-      outputdata = b"Content-Type: text/html; charset=UTF-8\r\n"
-
-
-      #Note that a complete header must end with a blank line, creating the four-byte sequence "\r\n\r\n" Refer to https://w3.cs.jmu.edu/kirkpams/OpenCSF/Books/csf/html/TCPSockets.html
- 
-      #Fill in end
-               
-      for i in f: #for line in file
-      #Fill in start - append your html file contents #Fill in end 
-        
-      #Send the content of the requested file to the client (don't forget the headers you created)!
-      #Send everything as one send command, do not send one line/item at a time!
-
-      # Fill in start
-
-
-      # Fill in end
-        
-      connectionSocket.close() #closing the connection socket
-      
-    except Exception as e:
-      # Send response message for invalid request due to the file not being found (404)
-      # Remember the format you used in the try: block!
       #Fill in start
-
-      #Fill in end
-
-
-      #Close client socket
-      #Fill in start
-
-      #Fill in end
-
-  # Commenting out the below (some use it for local testing). It is not required for Gradescope, and some students have moved it erroneously in the While loop. 
-  # DO NOT PLACE ANYWHERE ELSE AND DO NOT UNCOMMENT WHEN SUBMITTING, YOU ARE GONNA HAVE A BAD TIME
-  #serverSocket.close()
-  #sys.exit()  # Terminate the program after sending the corresponding data
+      #make response headers
+      outputdata = "HTTP/1.1 200 OK\r\n"
+      outputdata += "Content-Type: text/html; charset=UTF-8\r\n"  
+      outputdata += "Server: MyServer\r\n"   #changed server name
+      outputdata += "Connection: close\r\n\r\n"  #need empty line after headers
+            
+      #get file contents
+      filedata = ""
+      for line in f:  #read file line by line
+        filedata += line
+            
+            #send everything at once
+            connectionSocket.send(outputdata.encode() + filedata.encode())
+            #Fill in end
+            
+            connectionSocket.close()
+            
+        except:  #file not found
+            #Fill in start
+            #send 404 error
+            err = "HTTP/1.1 404 Not Found\r\n"
+            err += "Content-Type: text/html; charset=UTF-8\r\n" 
+            err += "Server: MyServer\r\n"
+            err += "Connection: close\r\n\r\n"
+            err += "<html><h1>404 Not Found</h1></html>"
+            
+            connectionSocket.send(err.encode())
+            #Fill in end
+            
+            #Fill in start
+            connectionSocket.close()  #close connection
+            #Fill in end
 
 if __name__ == "__main__":
-  webServer(13331)
+    webServer(13331)
